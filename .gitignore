@@ -1,0 +1,25 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime data, generated applications, checkpoints and exports
+data/
+generated_projects/*
+!generated_projects/.gitkeep
+
+# Frontend dependencies / build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Local secrets and machine-specific files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

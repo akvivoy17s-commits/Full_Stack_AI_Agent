@@ -1,0 +1,86 @@
+/* Reusable motion presets. Every effect is opt-in through a class or data attribute. */
+:root {
+  --motion-ease: cubic-bezier(.2,.75,.25,1);
+  --motion-fast: 180ms;
+  --motion-normal: 520ms;
+  --motion-slow: 850ms;
+  --motion-float-distance: 14px;
+  --motion-tilt-perspective: 1000px;
+}
+
+/* Scroll reveal */
+.reveal,.reveal-left,.reveal-scale,
+[data-reveal] {
+  opacity: 0;
+  transition: opacity var(--motion-slow) var(--motion-ease),
+              transform var(--motion-slow) var(--motion-ease);
+  transition-delay: calc(var(--d, 0) * 90ms);
+  will-change: opacity, transform;
+}
+.reveal,[data-reveal="up"] { transform: translate3d(0,24px,0); }
+.reveal-left,[data-reveal="left"] { transform: translate3d(-32px,0,0); }
+.reveal-scale,[data-reveal="scale"] { transform: scale(.92); }
+[data-reveal="right"] { transform: translate3d(32px,0,0); }
+[data-reveal="fade"] { transform: none; }
+.reveal.in,.reveal-left.in,.reveal-scale.in,[data-reveal].in { opacity: 1; transform: none; will-change: auto; }
+
+/* Gentle floating objects. Use data-float="soft|normal|strong" to tune intensity. */
+.float,[data-float],[data-animation="float"] {
+  --float-distance: var(--motion-float-distance);
+  animation: agent-float 6s ease-in-out infinite;
+  transform-origin: center;
+}
+[data-float="soft"] { --float-distance: 6px; animation-duration: 7s; }
+[data-float="normal"],[data-float="true"] { --float-distance: 14px; }
+[data-float="strong"] { --float-distance: 22px; animation-duration: 4.8s; }
+@keyframes agent-float { 0%,100% { translate: 0 0; } 50% { translate: 0 calc(var(--float-distance) * -1); } }
+
+/* Perspective tilt cards: JS only updates CSS custom properties. */
+[data-tilt], [data-animation="tilt-3d"], .tilt-3d {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  transform: perspective(var(--motion-tilt-perspective)) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease);
+  backface-visibility: hidden;
+}
+[data-tilt]:hover,[data-animation="tilt-3d"]:hover,.tilt-3d:hover {
+  box-shadow: 0 18px 44px -24px color-mix(in srgb, var(--primary, #7c3aed) 48%, transparent);
+}
+[data-depth="1"] { transform: translateZ(12px); }
+[data-depth="2"] { transform: translateZ(24px); }
+[data-depth="3"] { transform: translateZ(36px); }
+[data-3d="card"],[data-3d="tilt"],[data-3d="tilt-3d"] { transform-style: preserve-3d; }
+
+/* Scroll and mouse parallax are independent from the tilt effect. */
+[data-parallax] { --scroll-parallax-y: 0px; transform: translate3d(0,var(--scroll-parallax-y),0); will-change: transform; }
+[data-mouse-parallax] { --mouse-parallax-x: 0px; --mouse-parallax-y: 0px; transform: translate3d(var(--mouse-parallax-x),var(--mouse-parallax-y),0); will-change: transform; }
+[data-parallax][data-mouse-parallax] {
+  transform: translate3d(var(--mouse-parallax-x,0px),calc(var(--scroll-parallax-y,0px) + var(--mouse-parallax-y,0px)),0);
+}
+
+/* Optional 3D hero mount. Without its data hook, the Three.js module does nothing. */
+[data-three-hero],[data-3d="three-hero"] { position: relative; isolation: isolate; overflow: hidden; }
+[data-three-hero] > canvas,[data-3d="three-hero"] > canvas { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+[data-three-hero] > :not(canvas),[data-3d="three-hero"] > :not(canvas) { position: relative; z-index: 1; }
+.three-hero-fallback { background-image: radial-gradient(ellipse at 70% 30%, color-mix(in srgb, var(--primary,#7c3aed) 24%, transparent), transparent 60%); }
+
+.grad-text { background: linear-gradient(90deg,var(--primary),var(--accent),var(--primary)); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: agent-shine 6s linear infinite; }
+@keyframes agent-shine { to { background-position: 200% center; } }
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .45; pointer-events: none; background: var(--primary); animation: agent-drift 14s ease-in-out infinite alternate; }
+@keyframes agent-drift { to { transform: translate(40px,-30px) scale(1.15); } }
+.lift { transition: transform var(--motion-fast) var(--motion-ease),box-shadow var(--motion-fast) var(--motion-ease); }
+.lift:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px color-mix(in srgb,var(--primary) 50%,transparent); }
+.marquee { overflow: hidden; }
+.marquee > div { display: flex; gap: 48px; width: max-content; animation: agent-marquee 30s linear infinite; }
+@keyframes agent-marquee { to { transform: translateX(-50%); } }
+
+@media (hover:none), (pointer:coarse) {
+  [data-tilt],[data-animation="tilt-3d"],.tilt-3d { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal,.reveal-left,.reveal-scale,[data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+  *,*::before,*::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  [data-parallax],[data-mouse-parallax] { transform: none !important; }
+}
